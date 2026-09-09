@@ -1,0 +1,30 @@
+{
+  "name": "smart-accounting-suite",
+  "version": "1.0.0",
+  "description": "نرم‌افزار حسابداری پیشرفته با هوش مصنوعی - معماری چندمنظوره و multi-tenant",
+  "private": true,
+  "workspaces": [
+    "packages/shared",
+    "packages/backend",
+    "packages/frontend",
+    "packages/ai-service"
+  ],
+  "scripts": {
+    "dev:backend": "cd packages/backend && npm run dev",
+    "dev:frontend": "cd packages/frontend && npm run dev",
+    "dev:ai": "cd packages/ai-service && npm run dev",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:ai\" \"npm run dev:frontend\"",
+    "build": "npm run build -w packages/shared && npm run build -w packages/backend && npm run build -w packages/ai-service && npm run build -w packages/frontend",
+    "lint": "cd packages/backend && npm run lint",
+    "typecheck": "cd packages/backend && npm run typecheck",
+    "test": "cd packages/backend && npm run test",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down"
+  },
+  "devDependencies": {
+    "concurrently": "^8.0.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["@prisma/client", "esbuild"]
+  }
+}

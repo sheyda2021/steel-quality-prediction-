@@ -1,37 +1,81 @@
-# 🏗️ Steel Quality Prediction using Ensemble Learning
+# Smart Accounting - نرم‌افزار حسابداری هوشمند
 
-## 📝 Overview
-This repository contains a high-performance machine learning pipeline designed to predict the **quality score** of steel products. In the manufacturing industry, predicting quality based on production parameters like temperature and cooling rate is crucial for reducing defects and optimizing processes.
+نرم‌افزار حسابداری کامل با هوش مصنوعی، معماری multi-tenant و قابلیت فروش به کارفرما.
 
-The project was developed for a Kaggle competition hosted by **Mohammad Saeid**.
+## ویژگی‌ها
 
-## 🚀 Key Features
-- **Advanced Feature Engineering:** Extraction of time-based features (hour, weekday, weekend) and domain-specific interactions (e.g., Temperature/Time ratio).
-- **Automated Hyperparameter Tuning:** Used **Optuna** to find the most efficient parameters for Gradient Boosting models.
-- **Model Stacking (Ensemble):** Combined three powerful regressors (**LightGBM**, **XGBoost**, and **CatBoost**) using a **RidgeCV** meta-model to improve generalization and reduce RMSE.
-- **Robust Validation:** Implemented a 5-fold Cross-Validation strategy to ensure the model's reliability on unseen data.
+- **حسابداری استاندارد**: نمودار حساب‌ها، اسناد حسابداری، حساب دریافت/پرداخت، فاکتور، صورتحساب، بانک
+- **گزارشات مالی**: تراز نامه، صورت سود و ضرر، تریال بالانس
+- **هوش مصنوعی**: دسته‌بندی هوشمند تراکنش‌ها، پیش‌بینی نقدینگی، تشخیص ناهنجاری، بهینه‌سازی مالیات
+- **multi-tenant**: هر شرکت فضای جداگانه دارد
+- **SaaS آماده**: معماری قابل استقرار و فروش به کارفرما
+- **Docker**: بسته‌بندی کامل با docker-compose
 
-## 🛠️ Tech Stack
-- **Languages:** Python
-- **Libraries:** Pandas, NumPy, Scikit-learn
-- **Models:** LightGBM, XGBoost, CatBoost
-- **Optimization:** Optuna
+## معماری
 
-## 📊 Pipeline Workflow
-1. **Data Preprocessing:** Handling missing values and encoding categorical variables (Machine ID, Operator ID).
-2. **Feature Engineering:** Creating physical interaction features like `area_x_lum` and `temp_time_ratio`.
-3. **Tuning:** Running Optuna trials to minimize RMSE.
-4. **Ensembling:** Training base models on 5 folds and blending their predictions using a Ridge regressor.
+```
+packages/
+├── shared/       # انواع مشترک بین تمام سرویس‌ها
+├── backend/      # API سرور (Node.js + Express + TypeScript + Prisma)
+├── ai-service/   # میکروسرویس هوش مصنوعی
+└── frontend/     # رابط کاربری (React + TypeScript + Tailwind CSS)
+```
 
-## 📈 Results
-The final ensemble approach focuses on minimizing the **Root Mean Squared Error (RMSE)**, providing a balanced prediction that captures complex patterns in the production line data.
+## شروع به کار
 
-## 📂 Project Structure
-```text
-├── notebook.ipynb      # Main analysis and modeling code
-├── submission.csv      # Final predictions
-└── README.md           # Project documentation
+```bash
+# نصب وابستگی‌ها
+npm install
 
-👤 Author
-Sheyda Asadi
-⭐️ If you found this project helpful, please consider giving it a star!
+# راه‌اندازی دیتابیس
+docker-compose up -d db
+
+# اعمال مهاجرت دیتابیس
+cd packages/backend && npx prisma db push
+
+# راه‌اندازی توسعه
+npm run dev
+
+# یا با Docker
+docker-compose up -d
+```
+
+## API Endpoints
+
+### احراز هویت
+- `POST /api/v1/auth/register` - ثبت نام شرکت و ادمین
+- `POST /api/v1/auth/login` - ورود
+- `POST /api/v1/auth/refresh-token` - تازه‌سازی توکن
+
+### حسابداری
+- `GET/POST/PUT/DELETE /api/v1/accounts` - نمودار حساب‌ها
+- `GET/POST /api/v1/journals` - اسناد حسابداری
+- `GET/POST/PUT/DELETE /api/v1/customers` - مشتریان
+- `GET/POST/PUT/DELETE /api/v1/suppliers` - تامین‌کنندگان
+- `GET/POST/PUT /api/v1/invoices` - فاکتورها
+- `GET/POST/PUT /api/v1/bills` - صورتحساب‌ها
+- `GET/POST /api/v1/bank/accounts` - حساب‌های بانکی
+
+### گزارشات
+- `GET /api/v1/reports/BALANCE_SHEET` - تراز نامه
+- `GET /api/v1/reports/INCOME_STATEMENT` - صورت سود و ضرر
+- `GET /api/v1/reports/TRIAL_BALANCE` - تریال بالانس
+
+### هوش مصنوعی
+- `POST /api/v1/ai/categorize` - دسته‌بندی هوشمند
+- `GET /api/v1/ai/forecast` - پیش‌بینی نقدینگی
+- `GET /api/v1/ai/anomalies` - تشخیص ناهنجاری
+- `GET /api/v1/ai/tax-optimization` - بهینه‌سازی مالیات
+- `GET /api/v1/ai/suggestions` - پیشنهادات AI
+- `POST /api/v1/ai/suggestions/:id/apply` - اعمال پیشنهاد
+
+## تست
+
+```bash
+npm run test
+npm run test:coverage
+```
+
+## لایسنس
+
+MIT

@@ -1,0 +1,347 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id              String        @id @default(uuid())
+  name            String
+  legalName       String
+  taxId           String?
+  address         String?
+  phone           String?
+  email           String?
+  currency        String        @default("USD")
+  fiscalYearStart DateTime?
+  subscriptionTier SubscriptionTier @default(FREE)
+  isActive        Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  users           User[]
+  accounts        Account[]
+  journalEntries  JournalEntry[]
+  customers       Customer[]
+  suppliers       Supplier[]
+  invoices        Invoice[]
+  bills           Bill[]
+  bankAccounts    BankAccount[]
+  transactions    Transaction[]
+  aiSuggestions   AiSuggestion[]
+}
+
+enum SubscriptionTier {
+  FREE
+  BASIC
+  PRO
+  ENTERPRISE
+}
+
+model User {
+  id          String   @id @default(uuid())
+  companyId   String
+  email       String   @unique
+  firstName   String
+  lastName    String
+  phone       String?
+  role        UserRole @default(ACCOUNTANT)
+  password    String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  company     Company  @relation(fields: [companyId], references: [id])
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  ACCOUNTANT
+  VIEWER
+}
+
+model Account {
+  id          String   @id @default(uuid())
+  companyId   String
+  code        String
+  name        String
+  type        AccountType
+  category    AccountCategory?
+  description String?
+  parentId    String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  company     Company  @relation(fields: [companyId], references: [id])
+  parent      Account? @relation("AccountHierarchy", fields: [parentId], references: [id])
+  children    Account[] @relation("AccountHierarchy")
+  journalLines JournalEntryLine[]
+  invoiceItems InvoiceItem[]
+  billItems   BillItem[]
+  transactions Transaction[]
+}
+
+enum AccountType {
+  ASSET
+  LIABILITY
+  EQUITY
+  REVENUE
+  EXPENSE
+}
+
+enum AccountCategory {
+  CURRENT_ASSETS
+  FIXED_ASSETS
+  CURRENT_LIABILITIES
+  LONG_TERM_LIABILITIES
+  OPERATING_REVENUE
+  OPERATING_EXPENSE
+  COST_OF_GOODS_SOLD
+}
+
+model JournalEntry {
+  id        String   @id @default(uuid())
+  companyId String
+  entryNumber String @unique
+  date      DateTime
+  description String
+  type      TransactionType
+  referenceId String?
+  totalDebit  Decimal @default(0)
+  totalCredit Decimal @default(0)
+  currency    String @default("USD")
+  isPosted    Boolean @default(false)
+  createdBy   String
+  approvedBy  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  company    Company @relation(fields: [companyId], references: [id])
+  lines      JournalEntryLine[]
+}
+
+enum TransactionType {
+  JOURNAL_ENTRY
+  PAYMENT
+  RECEIPT
+  TRANSFER
+  INVOICE
+  BILL
+}
+
+model JournalEntryLine {
+  id        String   @id @default(uuid())
+  entryId   String
+  accountId String
+  description String?
+  debit     Decimal @default(0)
+  credit    Decimal @default(0)
+  currency  String  @default("USD")
+  createdAt DateTime @default(now())
+
+  entry     JournalEntry @relation(fields: [entryId], references: [id])
+  account   Account      @relation(fields: [accountId], references: [id])
+}
+
+model Customer {
+  id          String   @id @default(uuid())
+  companyId   String
+  code        String
+  name        String
+  phone       String?
+  email       String?
+  address     String?
+  taxId       String?
+  category    String?
+  creditLimit Decimal  @default(0)
+  balance     Decimal  @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  company     Company  @relation(fields: [companyId], references: [id])
+  invoices    Invoice[]
+  transactions Transaction[]
+}
+
+model Supplier {
+  id          String   @id @default(uuid())
+  companyId   String
+  code        String
+  name        String
+  phone       String?
+  email       String?
+  address     String?
+  taxId       String?
+  category    String?
+  creditLimit Decimal  @default(0)
+  balance     Decimal  @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  company     Company  @relation(fields: [companyId], references: [id])
+  bills       Bill[]
+  transactions Transaction[]
+}
+
+model Invoice {
+  id            String   @id @default(uuid())
+  companyId     String
+  invoiceNumber String
+  customerId    String
+  date          DateTime
+  dueDate       DateTime
+  status        InvoiceStatus @default(DRAFT)
+  subtotal      Decimal
+  taxTotal      Decimal
+  discountTotal Decimal
+  total         Decimal
+  paidAmount    Decimal  @default(0)
+  currency      String   @default("USD")
+  description   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  company       Company    @relation(fields: [companyId], references: [id])
+  customer      Customer   @relation(fields: [customerId], references: [id])
+  items         InvoiceItem[]
+}
+
+enum InvoiceStatus {
+  DRAFT
+  POSTED
+  PAID
+  CANCELLED
+}
+
+model InvoiceItem {
+  id          String  @id @default(uuid())
+  invoiceId   String
+  description String
+  accountId   String
+  quantity    Decimal
+  unitPrice   Decimal
+  taxRate     Decimal
+  taxAmount   Decimal
+  total       Decimal
+  discount    Decimal @default(0)
+
+  invoice     Invoice @relation(fields: [invoiceId], references: [id])
+  account     Account @relation(fields: [accountId], references: [id])
+}
+
+model Bill {
+  id        String   @id @default(uuid())
+  companyId String
+  billNumber String
+  supplierId  String
+  date        DateTime
+  dueDate     DateTime
+  status      BillStatus @default(DRAFT)
+  subtotal    Decimal
+  taxTotal    Decimal
+  discountTotal Decimal
+  total       Decimal
+  paidAmount  Decimal  @default(0)
+  currency    String   @default("USD")
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  company     Company   @relation(fields: [companyId], references: [id])
+  supplier    Supplier  @relation(fields: [supplierId], references: [id])
+  items       BillItem[]
+}
+
+enum BillStatus {
+  DRAFT
+  POSTED
+  PAID
+  CANCELLED
+}
+
+model BillItem {
+  id          String  @id @default(uuid())
+  billId      String
+  description String
+  accountId   String
+  quantity    Decimal
+  unitPrice   Decimal
+  taxRate     Decimal
+  taxAmount   Decimal
+  total       Decimal
+  discount    Decimal @default(0)
+
+  bill        Bill    @relation(fields: [billId], references: [id])
+  account     Account @relation(fields: [accountId], references: [id])
+}
+
+model BankAccount {
+  id           String  @id @default(uuid())
+  companyId    String
+  name        String
+  bankName    String
+  accountNumber String
+  iban        String?
+  balance     Decimal @default(0)
+  currency    String  @default("USD")
+  isActive    Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  company     Company @relation(fields: [companyId], references: [id])
+  transactions Transaction[]
+}
+
+model Transaction {
+  id          String   @id @default(uuid())
+  companyId   String
+  date        DateTime
+  description String
+  amount      Decimal
+  currency    String   @default("USD")
+  type        TransactionType
+  accountId   String
+  customerId  String?
+  supplierId  String?
+  bankAccountId String?
+  referenceId String?
+  isCleared   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  company       Company       @relation(fields: [companyId], references: [id])
+  account       Account       @relation(fields: [accountId], references: [id])
+  customer      Customer?     @relation(fields: [customerId], references: [id])
+  supplier      Supplier?     @relation(fields: [supplierId], references: [id])
+  bankAccount   BankAccount?  @relation(fields: [bankAccountId], references: [id])
+}
+
+model AiSuggestion {
+  id        String   @id @default(uuid())
+  companyId String
+  type      AiSuggestionType
+  title     String
+  description String
+  data      Json
+  confidence Decimal
+  isApplied Boolean @default(false)
+  createdAt DateTime @default(now())
+  expiresAt DateTime?
+
+  company   Company @relation(fields: [companyId], references: [id])
+}
+
+enum AiSuggestionType {
+  CATEGORIZATION
+  FORECASTING
+  ANOMALY
+  RECONCILIATION
+  TAX_OPTIMIZATION
+}

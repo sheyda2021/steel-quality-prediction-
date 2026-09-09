@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: accounting-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: accounting
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./packages/backend/prisma/migrations:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: .
+      dockerfile: packages/backend/Dockerfile
+    container_name: accounting-backend
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/accounting?schema=public
+      NODE_ENV: production
+      JWT_SECRET: ${JWT_SECRET:-super-secret-key-change-in-production}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-super-refresh-key-change-in-production}
+      AI_SERVICE_URL: http://ai-service:4001
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "4000:4000"
+    restart: unless-stopped
+
+  ai-service:
+    build:
+      context: .
+      dockerfile: packages/ai-service/Dockerfile
+    container_name: accounting-ai-service
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      AI_MODEL_NAME: ${AI_MODEL_NAME:-gpt-4o-mini}
+      AI_MAX_TOKENS: 4000
+      AI_TEMPERATURE: 0.3
+    ports:
+      - "4001:4001"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: packages/frontend/Dockerfile
+    container_name: accounting-frontend
+    environment:
+      VITE_API_URL: http://localhost:4000/api/v1
+      VITE_AI_SERVICE_URL: http://localhost:4001
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    container_name: accounting-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - nginx_data:/etc/nginx/ssl
+    depends_on:
+      - frontend
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  nginx_data:
