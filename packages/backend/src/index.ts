@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Express } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -7,7 +7,7 @@ import { errorHandler, notFound } from '@middleware/error.middleware';
 import routes from '@routes/index';
 import { logger } from '@utils/logger';
 
-const app = express();
+const app: Express.Application = express();
 
 app.use(helmet());
 app.use(cors({
