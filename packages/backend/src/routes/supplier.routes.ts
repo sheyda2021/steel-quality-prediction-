@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { supplierController } from '@controllers/supplier.controller';
 import { authenticate } from '@middleware/auth.middleware';
 
-const router: Router = Router();
+const router = Router();
 
 router.post('/', authenticate, supplierController.create.bind(supplierController));
 router.get('/', authenticate, supplierController.getAll.bind(supplierController));

@@ -10,7 +10,7 @@ import bankRoutes from './bank.routes';
 import reportRoutes from './report.routes';
 import aiRoutes from './ai.routes';
 
-const router: Router = Router();
+const router = Router();
 
 router.use('/auth', authRoutes);
 router.use('/accounts', accountRoutes);

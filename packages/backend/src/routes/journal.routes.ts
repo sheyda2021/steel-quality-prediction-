@@ -3,7 +3,7 @@ import { journalController } from '@controllers/journal.controller';
 import { authenticate, authorize } from '@middleware/auth.middleware';
 import { UserRole } from '@shared';
 
-const router: Router = Router();
+const router = Router();
 
 router.post('/', authenticate, authorize(UserRole.Admin, UserRole.Manager, UserRole.Accountant), journalController.create.bind(journalController));
 router.get('/', authenticate, journalController.getAll.bind(journalController));

@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { aiController } from '@controllers/ai.controller';
 import { authenticate } from '@middleware/auth.middleware';
 
-const router: Router = Router();
+const router = Router();
 
 router.get('/forecast', authenticate, aiController.getCashFlowForecast.bind(aiController));
 router.get('/anomalies', authenticate, aiController.getAnomalies.bind(aiController));

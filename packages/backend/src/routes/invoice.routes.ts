@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { invoiceController } from '@controllers/invoice.controller';
 import { authenticate } from '@middleware/auth.middleware';
 
-const router: Router = Router();
+const router = Router();
 
 router.post('/', authenticate, invoiceController.create.bind(invoiceController));
 router.get('/', authenticate, invoiceController.getAll.bind(invoiceController));
