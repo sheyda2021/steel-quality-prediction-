@@ -69,6 +69,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       updatedAt: new Date(),
       firstName: '',
       lastName: '',
+      phone: '',
     };
 
     setUser(userObj);

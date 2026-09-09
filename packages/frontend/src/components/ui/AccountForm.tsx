@@ -32,7 +32,8 @@ const AccountForm: React.FC<AccountFormProps> = ({ account, onClose, onSave }) =
   const [loading, setLoading] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>): void => {
-    const { name, value, type: inputType, checked } = e.target;
+    const { name, value, type: inputType } = e.target;
+    const checked = (e.target as HTMLInputElement).checked;
     setFormData({
       ...formData,
       [name]: inputType === 'checkbox' ? checked : value,

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
-import { PlusIcon, MagnifyingIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, MagnifyingGlassIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import SupplierForm from '../components/ui/SupplierForm';
 
 interface Supplier {
@@ -64,7 +64,7 @@ const SuppliersPage: React.FC = () => {
       </div>
 
       <div className="relative">
-        <MagnifyingIcon className="w-5 h-5 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+        <MagnifyingGlassIcon className="w-5 h-5 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
         <input
           type="text"
           placeholder="جستجو در تامین‌کنندگان..."

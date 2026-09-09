@@ -9,11 +9,11 @@ import {
   UsersIcon,
   DocumentTextIcon,
   ReceiptRefundIcon,
-  BankIcon,
+  CurrencyDollarIcon,
   ChartBarIcon,
   SparklesIcon,
   CogIcon,
-  ArrowRightOnElementIcon,
+  ArrowLeftOnRectangleIcon,
 } from '@heroicons/react/24/outline';
 
 interface NavItem {
@@ -34,7 +34,7 @@ const Sidebar: React.FC = () => {
     { name: 'تامین‌کنندگان', path: '/suppliers', icon: UsersIcon },
     { name: 'فاکتورها', path: '/invoices', icon: DocumentTextIcon },
     { name: 'صورتحساب‌ها', path: '/bills', icon: ReceiptRefundIcon },
-    { name: 'حساب‌های بانکی', path: '/bank', icon: BankIcon },
+    { name: 'حساب‌های بانکی', path: '/bank', icon: CurrencyDollarIcon },
     { name: 'گزارشات مالی', path: '/reports', icon: ChartBarIcon },
     { name: 'بینش‌های هوش مصنوعی', path: '/ai-insights', icon: SparklesIcon },
     { name: 'تنظیمات', path: '/settings', icon: CogIcon },
@@ -73,7 +73,7 @@ const Sidebar: React.FC = () => {
           onClick={handleLogout}
           className="flex items-center w-full px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
         >
-          <ArrowRightOnElementIcon className="w-5 h-5 ml-3" />
+          <ArrowLeftOnRectangleIcon className="w-5 h-5 ml-3" />
           <span className="text-sm">خروج</span>
         </button>
       </div>
